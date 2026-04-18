@@ -1,0 +1,90 @@
+version: '3'
+
+tasks:
+  install-tools:
+    desc: Install necessary tools for development
+    silent: true
+    cmds:
+      - task: asdf
+      - task: helm-plugins
+      - task: npm-packages 
+      - task: wget
+
+  helm-plugins:
+    desc: Install helm plugins
+    vars:
+      HELM_PLUGIN:
+      - https://github.com/databus23/helm-diff
+      - https://github.com/jkroepke/helm-secrets
+      - https://github.com/vmware-labs/distribution-tooling-for-helm
+    cmds:
+      - echo "📦 Installing Helm plugins..."
+      - for: { var: HELM_PLUGIN }
+        cmd: helm plugin install {{.ITEM}} --verify=false
+
+  npm-packages:
+    desc: Install npm packages
+    vars:
+      NPM_PACKAGE:
+      - better-commits
+    cmds:
+      - echo "📦 Installing npm packages..."
+      - for: { var: NPM_PACKAGE }
+        cmd: npm install -g {{.ITEM}}
+
+  asdf:
+    desc: Install tools using asdf from .tool-versions
+    cmds:
+      - echo "⬇️ Adding custom asdf plugins..."
+      - ASDF_PYAPP_INCLUDE_DEPS=1 asdf plugin add ansible https://github.com/amrox/asdf-pyapp.git
+      - command -v asdf >/dev/null || { echo "❌ asdf not found"; exit 1; }
+      - '[ -f .tool-versions ] || { echo "❌ .tool-versions not found"; exit 1; }'
+      - |
+        while IFS= read -r line; do
+          [ -z "$line" ] && continue  # skip empty lines
+          name=$(echo "$line" | awk '{print $1}')
+          version=$(echo "$line" | awk '{print $2}')
+          echo "📦 Installing $name $version..."
+          asdf plugin add "$name" || echo "Plugin $name already added or failed to add."
+          asdf install "$name" "$version"
+        done < .tool-versions
+      - echo "✅ All tools from .tool-versions installed via asdf"
+
+  wget:
+    desc: Install tools via wget
+    vars:
+      TOOLS:
+        - name: yj
+          url: https://github.com/sclevine/yj/releases/download/v5.1.0/yj-linux-amd64
+        - name: yq
+          url: https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    cmds:
+      - echo "📦 Installing tools via wget..."
+      - for: { var: TOOLS }
+        cmd: |
+          echo "Downloading {{.ITEM.name}} from {{.ITEM.url}}..."
+          sudo wget -qO /usr/local/bin/{{.ITEM.name}} {{.ITEM.url}}
+          sudo chmod +x /usr/local/bin/{{.ITEM.name}}
+          echo "✅ {{.ITEM.name}} installed successfully"
+  
+  check-branch:
+    desc: Checking branch name format
+    silent: true
+    vars:
+      REGEX: "^(feat|fix|docs|refactor|perf|test|build|ci|chore)\\/[A-Za-z0-9._-]+$"
+    cmds:
+      - |
+        if [[ -z "${BRANCH}" ]]; then
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        else
+            BRANCH="${BRANCH}"
+        fi
+
+        echo "Branch name: $BRANCH"
+
+        if ! [[ $BRANCH =~ {{ .REGEX }} ]]; then
+          echo "Your commit was rejected due to branching name"
+          echo "Please rename your branch with '(feat|fix|docs|refactor|perf|test|build|ci|chore)/lowercase-name' syntax"
+          echo "Or you can use better-branch tools"
+          exit 1
+        fi
