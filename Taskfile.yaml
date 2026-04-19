@@ -13,7 +13,7 @@ tasks:
     cmds:
       - task: asdf
       - task: helm-plugins
-      - task: npm-packages 
+      - task: npm-packages
       - task: wget
   helm-plugins:
     desc: Install helm plugins
@@ -94,7 +94,7 @@ tasks:
           exit 1
         fi
   configure:
-    desc: Check and add init to ~/.bashrc
+    desc: Check and configure
     silent: true
     cmds:
       - |
@@ -104,4 +104,6 @@ tasks:
         else
           echo "✅ Starship init already present in ~/.bashrc"
         fi
-      - cd dotfiles/.config && stow -t ~/.config .
+      - |
+        mkdir -p ~/.config/gcloud
+        stow -t ~/ dotfiles
