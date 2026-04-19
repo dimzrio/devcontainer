@@ -24,19 +24,11 @@ repos:
         name: check commit message convention
         stages: [commit-msg]
 
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.38.0
-    hooks:
-      - id: yamllint
-        name: lint kubernetes yaml
-        args: [--strict, --config-file=./infrastructure/kubernetes/.yamllint.yaml]
-        files: ^infrastructure/kubernetes/
-
   - repo: local
     hooks:
       - id: branch-name-convention
         name: check branch name convention
-        entry: bash -c "task pre-commit:check-branch"
+        entry: bash -c "task check-branch"
         language: system
         pass_filenames: false
         stages: [pre-push]
