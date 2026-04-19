@@ -1,0 +1,34 @@
+default_install_hook_types: [pre-commit, pre-push, commit-msg]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: no-commit-to-branch
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+        name: detect hardcoded secrets
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        name: check commit message convention
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
+      - id: branch-name-convention
+        name: check branch name convention
+        entry: bash -c "task check-branch"
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
