@@ -6,16 +6,18 @@
     "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
     "ghcr.io/devcontainers/features/python:1": { "version": "latest" },
     "ghcr.io/devcontainers-extra/features/go-task:1": {},
-    "ghcr.io/devcontainer-community/devcontainer-features/asdf-vm.com:1": {}
+    "ghcr.io/devcontainer-community/devcontainer-features/asdf-vm.com:1": {},
+    "ghcr.io/devcontainers-extra/features/apt-packages:1": { "packages": "netcat-openbsd,stow" }
   },
-  "postCreateCommand": "task install-tools",
+  "postCreateCommand": "task post-setup",
   "customizations": {
     "vscode": {
       "settings": {
         "terminal.integrated.shell.linux": "/bin/bash"
       },
       "extensions": [
-        "signageos.signageos-vscode-sops"
+        "signageos.signageos-vscode-sops",
+        "sst-dev.opencode"
       ]
     }
   },

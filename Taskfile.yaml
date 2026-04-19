@@ -1,6 +1,12 @@
 version: '3'
-
 tasks:
+  post-setup:
+    desc: Post configuration
+    silent: true
+    cmds:
+      - task: configure
+      - task: install-tools
+      - pre-commit install
   install-tools:
     desc: Install necessary tools for development
     silent: true
@@ -9,7 +15,6 @@ tasks:
       - task: helm-plugins
       - task: npm-packages 
       - task: wget
-
   helm-plugins:
     desc: Install helm plugins
     vars:
@@ -21,9 +26,9 @@ tasks:
       - echo "📦 Installing Helm plugins..."
       - for: { var: HELM_PLUGIN }
         cmd: helm plugin install {{.ITEM}} --verify=false
-
   npm-packages:
     desc: Install npm packages
+    silent: true
     vars:
       NPM_PACKAGE:
       - better-commits
@@ -31,11 +36,12 @@ tasks:
       - echo "📦 Installing npm packages..."
       - for: { var: NPM_PACKAGE }
         cmd: npm install -g {{.ITEM}}
-
   asdf:
     desc: Install tools using asdf from .tool-versions
+    silent: true
     cmds:
       - echo "⬇️ Adding custom asdf plugins..."
+      - asdf plugin add opencode https://github.com/bitfrost/asdf-opencode.git
       - ASDF_PYAPP_INCLUDE_DEPS=1 asdf plugin add ansible https://github.com/amrox/asdf-pyapp.git
       - command -v asdf >/dev/null || { echo "❌ asdf not found"; exit 1; }
       - '[ -f .tool-versions ] || { echo "❌ .tool-versions not found"; exit 1; }'
@@ -49,9 +55,9 @@ tasks:
           asdf install "$name" "$version"
         done < .tool-versions
       - echo "✅ All tools from .tool-versions installed via asdf"
-
   wget:
     desc: Install tools via wget
+    silent: true
     vars:
       TOOLS:
         - name: yj
@@ -66,7 +72,6 @@ tasks:
           sudo wget -qO /usr/local/bin/{{.ITEM.name}} {{.ITEM.url}}
           sudo chmod +x /usr/local/bin/{{.ITEM.name}}
           echo "✅ {{.ITEM.name}} installed successfully"
-  
   check-branch:
     desc: Checking branch name format
     silent: true
@@ -88,3 +93,15 @@ tasks:
           echo "Or you can use better-branch tools"
           exit 1
         fi
+  configure:
+    desc: Check and add init to ~/.bashrc
+    silent: true
+    cmds:
+      - |
+        if ! grep -q 'starship init bash' ~/.bashrc 2>/dev/null; then
+          echo 'eval "$(starship init bash)"' >> ~/.bashrc
+          echo "✅ Added starship init to ~/.bashrc"
+        else
+          echo "✅ Starship init already present in ~/.bashrc"
+        fi
+      - cd dotfiles/.config && stow -t ~/.config .
