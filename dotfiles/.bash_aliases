@@ -3,8 +3,10 @@
 # Add your aliases below
 
 # 🧩 Git Aliases
-alias gaa='git add -A'
-alias gcm='git commit -m'
 alias gco='git checkout'
 alias gpo='git push origin'
-alias gclean='git reset --hard && git clean -df'
+
+alias gcm='git add -A; git commit -m'
+alias gdf='git reset --hard && git clean -df'
+alias glu='git config --local user.name'
+alias gle='git config --local user.email'
