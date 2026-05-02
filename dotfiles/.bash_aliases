@@ -1,6 +1,5 @@
 #!/bin/bash
 # Custom command aliases
-# Add your aliases below
 
 # 🧩 Git Aliases
 alias gcl='git reset --hard && git clean -df'
