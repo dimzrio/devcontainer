@@ -105,5 +105,12 @@ tasks:
           echo "✅ Starship init already present in ~/.bashrc"
         fi
       - |
+        if ! grep -q '\.bash_aliases' ~/.bashrc 2>/dev/null; then
+          echo '[ -f ~/.bash_aliases ] && source ~/.bash_aliases' >> ~/.bashrc
+          echo "✅ Added .bash_aliases sourcing to ~/.bashrc"
+        else
+          echo "✅ .bash_aliases already sourced in ~/.bashrc"
+        fi
+      - |
         mkdir -p ~/.config/gcloud
         stow -t ~/ dotfiles
