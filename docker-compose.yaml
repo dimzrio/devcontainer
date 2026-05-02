@@ -1,0 +1,34 @@
+volumes:
+  docker-data:
+
+services:
+  docker:
+    image: docker:dind
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=
+    volumes:
+      - docker-data:/var/lib/docker
+    networks:
+      - dev
+
+  devcontainer:
+    build: .
+    environment:
+      - TERM=xterm-256color
+      - PATH=/home/vscode/.asdf/shims:/home/vscode/.asdf/bin:/home/vscode/.local/bin:/usr/local/go/bin:${PATH}
+      - DOCKER_HOST=tcp://docker:2375
+    volumes:
+      - .:/workspaces/devcontainer
+    user: vscode
+    stdin_open: true
+    tty: true
+    command: bash
+    depends_on:
+      - docker
+    networks:
+      - dev
+
+networks:
+  dev:
+    driver: bridge
